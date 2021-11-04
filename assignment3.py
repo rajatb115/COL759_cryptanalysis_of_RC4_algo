@@ -2,11 +2,13 @@ import random
 import gmpy2
 from gmpy2 import mpz
 import math
+import sys
+import os
 
 import matplotlib.pyplot as plt
 
 debug = False
-tot_itrations = 60
+tot_itrations = int(sys.argv[2])
 
 def keyScheduling(S,key,sBytes):
     key1=[]
@@ -84,7 +86,7 @@ def randomness(D,C,N):
 	return (D*C)/N
 
 
-outputBytes = 2
+outputBytes = int(sys.argv[1])
 
 
 key = randomKeyStreamGeneration(2048)
@@ -131,8 +133,8 @@ plt.plot(x_axis,rArr)
 plt.xlabel('Number of bits filpped')
 plt.ylabel('R')
 
-plt.savefig("plot_"+str(outputBytes)+"_"+str(tot_itrations)+".png")
-
+#plt.savefig("plot_"+str(outputBytes)+"_"+str(tot_itrations)+".png")
+plt.savefig(sys.argv[3])
 plt.show()
 
 
