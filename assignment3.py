@@ -6,6 +6,7 @@ import math
 import matplotlib.pyplot as plt
 
 debug = False
+tot_itrations = 60
 
 def keyScheduling(S,key,sBytes):
     key1=[]
@@ -83,7 +84,7 @@ def randomness(D,C,N):
 	return (D*C)/N
 
 
-outputBytes = 1024
+outputBytes = 2
 
 
 key = randomKeyStreamGeneration(2048)
@@ -99,7 +100,7 @@ flippingBitsArr = [i for i in range(1,33)]
 
 rArr=[0 for i in range(32)]
 
-for i in range(20):
+for i in range(tot_itrations):
     for f in flippingBitsArr:
         flippedKey = flippingKeyBits(key, f)
         output2 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], flippedKey, 256))
@@ -115,7 +116,7 @@ for i in range(20):
         rArr[f-1] += (randomness(D,C,N))
 
 for i in range(32):
-	rArr[i]=rArr[i]/20
+	rArr[i]=rArr[i]/tot_itrations
 
 print(rArr)
 
@@ -130,7 +131,7 @@ plt.plot(x_axis,rArr)
 plt.xlabel('Number of bits filpped')
 plt.ylabel('R')
 
-plt.savefig("plot_"+str(outputBytes)+".png")
+plt.savefig("plot_"+str(outputBytes)+"_"+str(tot_itrations)+".png")
 
 plt.show()
 
