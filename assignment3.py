@@ -5,7 +5,7 @@ import math
 
 import matplotlib.pyplot as plt
 
-debug = True
+debug = False
 
 def keyScheduling(S,key,sBytes):
     key1=[]
@@ -83,7 +83,7 @@ def randomness(D,C,N):
 	return (D*C)/N
 
 
-outputBytes = 128
+outputBytes = 1024
 
 
 key = randomKeyStreamGeneration(2048)
