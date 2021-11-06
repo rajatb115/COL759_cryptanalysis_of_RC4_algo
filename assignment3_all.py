@@ -8,7 +8,7 @@ import os
 import matplotlib.pyplot as plt
 
 debug = False
-tot_itrations = int(sys.argv[2])
+tot_itrations = int(sys.argv[1])
 
 # Key scheduling function
 def keyScheduling(S,key,sBytes):
@@ -94,74 +94,78 @@ def count_ones(output1, output2):
             cnt+=1
     return cnt
 
-outputBytes = int(sys.argv[1])
+# outputBytes = int(sys.argv[1])
 
-
-key = randomKeyStreamGeneration(2048)
-if(debug):
-    print(len(key))
-
-output1 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], key, 256))
-if(debug):
-    print(len(output1))
-
-
-flippingBitsArr = [i for i in range(1,33)]
-
-rArr=[0 for i in range(32)]
-
-xorOutputs_lis = []
-
-for i in range(32):
-    xorOutputs_lis.append([])
-
-for i in range(tot_itrations):
-    for f in flippingBitsArr:
-        flippedKey = flippingKeyBits(key, f)
-        output2 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], flippedKey, 256))
-        
-        if(debug):
-            print(len(output2))
-        
-        xorOutputs = xor(output1,output2)
-        xorOutputs_lis[f-1].append(xorOutputs)
-        
-        counter = frequencyCountingTestForRandomnessTesting(xorOutputs)
-        D = standardDeviation(counter)
-        N = len(xorOutputs)
-        C = len(counter)
-        rArr[f-1] += (randomness(D,C,N))
-
-# checking the number of bits are similar
-for i in range(len(xorOutputs_lis)):
-    sm = 0
-    for j in range(1,len(xorOutputs_lis[0])):
-        
-        if(debug):
-            print(xorOutputs_lis[i][0])
-            print(xorOutputs_lis[i][j])
-        sm+=count_ones(xorOutputs_lis[i][0],xorOutputs_lis[i][j])
-    print(sm/(len(xorOutputs_lis[0])-1))
-
-
-for i in range(32):
-	rArr[i]=rArr[i]/tot_itrations
-
-print(rArr)
-
-x_axis=[]
-for i in range(1,33):
-    x_axis.append(i)
-# plotting
-#plt.figure(figsize=(10,10))
 plt.figure()
-plt.plot(x_axis,rArr)
+
+for outputBytes in [2,4,8,32,128,1024]:
+    key = randomKeyStreamGeneration(2048)
+    if(debug):
+        print(len(key))
+
+    output1 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], key, 256))
+    if(debug):
+        print(len(output1))
+
+
+    flippingBitsArr = [i for i in range(1,33)]
+
+    rArr=[0 for i in range(32)]
+
+    xorOutputs_lis = []
+
+    for i in range(32):
+        xorOutputs_lis.append([])
+
+    for i in range(tot_itrations):
+        for f in flippingBitsArr:
+            flippedKey = flippingKeyBits(key, f)
+            output2 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], flippedKey, 256))
+
+            if(debug):
+                print(len(output2))
+
+            xorOutputs = xor(output1,output2)
+            xorOutputs_lis[f-1].append(xorOutputs)
+
+            counter = frequencyCountingTestForRandomnessTesting(xorOutputs)
+            D = standardDeviation(counter)
+            N = len(xorOutputs)
+            C = len(counter)
+            rArr[f-1] += (randomness(D,C,N))
+
+    # checking the number of bits are similar
+    for i in range(len(xorOutputs_lis)):
+        sm = 0
+        for j in range(1,len(xorOutputs_lis[0])):
+
+            if(debug):
+                print(xorOutputs_lis[i][0])
+                print(xorOutputs_lis[i][j])
+            sm+=count_ones(xorOutputs_lis[i][0],xorOutputs_lis[i][j])
+        print(sm/(len(xorOutputs_lis[0])-1))
+
+
+    for i in range(32):
+        rArr[i]=rArr[i]/tot_itrations
+
+    print(rArr)
+
+    x_axis=[]
+    for i in range(1,33):
+        x_axis.append(i)
+    # plotting
+    #plt.figure(figsize=(10,10))
+    
+    plt.plot(x_axis,rArr,label = str(outputBytes)+" Bytes")
+
+    
 
 plt.xlabel('Number of bits filpped')
 plt.ylabel('R')
-
+plt.legend(loc="upper right")
 #plt.savefig("plot_"+str(outputBytes)+"_"+str(tot_itrations)+".png")
-plt.savefig(sys.argv[3])
+plt.savefig(sys.argv[2])
 
 if (debug):
     plt.show()
