@@ -87,45 +87,6 @@ def standardDeviation(counter):
 def randomness(D,C,N):
 	return (D*C)/N
 
-
-outputBytes = int(sys.argv[1])
-
-
-key = randomKeyStreamGeneration(2048)
-if(debug):
-    print(len(key))
-
-output1 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], key, 256))
-if(debug):
-    print(len(output1))
-
-
-flippingBitsArr = [i for i in range(1,33)]
-
-rArr=[0 for i in range(32)]
-
-xorOutputs_lis = []
-
-for i in range(32):
-    xorOutputs_lis.append([])
-
-for i in range(tot_itrations):
-    for f in flippingBitsArr:
-        flippedKey = flippingKeyBits(key, f)
-        output2 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], flippedKey, 256))
-        
-        if(debug):
-            print(len(output2))
-        
-        xorOutputs = xor(output1,output2)
-        xorOutputs_lis[f-1].append(xorOutputs)
-        
-        counter = frequencyCountingTestForRandomnessTesting(xorOutputs)
-        D = standardDeviation(counter)
-        N = len(xorOutputs)
-        C = len(counter)
-        rArr[f-1] += (randomness(D,C,N))
-
 def avgLengthCalculator(output1, output2):
 	val = 0
 	for i in range(len(output1)):
@@ -152,6 +113,7 @@ def avgLengthOfIdenticalOutputVsNumberOfBitsFlipped(totalOutputBytes, numberOfRu
     plt.xlabel('Number bits fliped')
     plt.ylabel('Average length in bytes of identical output')
     plt.savefig(sys.argv[2])
-    plt.show()
+    if (debug):
+        plt.show()
 
 avgLengthOfIdenticalOutputVsNumberOfBitsFlipped(1000, tot_itrations)

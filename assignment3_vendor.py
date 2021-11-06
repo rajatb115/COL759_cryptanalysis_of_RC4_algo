@@ -111,7 +111,8 @@ def vendorPart(vendorMessageLengthInBytes, maximumOutputToThrowForAnalysis, numb
     
     plt.savefig(sys.argv[2])
     
-    plt.show()
+    if(debug):
+        plt.show()
     numberOfOutputsWeShouldThrowForMinRandomness = avgRandomnessArr.index(min(avgRandomnessArr))
     return numberOfOutputsWeShouldThrowForMinRandomness
 

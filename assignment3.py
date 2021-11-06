@@ -7,7 +7,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-debug = True
+debug = False
 tot_itrations = int(sys.argv[2])
 
 # Key scheduling function
@@ -110,12 +110,7 @@ flippingBitsArr = [i for i in range(1,33)]
 
 rArr=[0 for i in range(32)]
 
-xorOutputs_lis = []
 
-for i in range(33):
-    xorOutputs_lis.append([])
-    
-xorOutputs_lis[0].append(output1)
 
 for i in range(tot_itrations):
     for f in flippingBitsArr:
@@ -126,24 +121,12 @@ for i in range(tot_itrations):
             print(len(output2))
         
         xorOutputs = xor(output1,output2)
-        xorOutputs_lis[f].append(output2)
         
         counter = frequencyCountingTestForRandomnessTesting(xorOutputs)
         D = standardDeviation(counter)
         N = len(xorOutputs)
         C = len(counter)
         rArr[f-1] += (randomness(D,C,N))
-
-# checking the number of bits are similar
-for i in range(len(xorOutputs_lis)):
-    sm = 0
-    for j in range(1,len(xorOutputs_lis[0])):
-        
-        if(debug):
-            print(xorOutputs_lis[i][0])
-            print(xorOutputs_lis[i][j])
-        sm+=count_ones(xorOutputs_lis[i][0],xorOutputs_lis[i][j])
-    print(sm/(len(xorOutputs_lis[0])-1))
 
 
 for i in range(32):

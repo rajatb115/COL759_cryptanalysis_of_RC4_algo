@@ -106,10 +106,6 @@ for outputBytes in [2,4,8,32,128,1024]:
 
     rArr=[0 for i in range(32)]
 
-    xorOutputs_lis = []
-
-    for i in range(32):
-        xorOutputs_lis.append([])
 
     for i in range(tot_itrations):
         for f in flippingBitsArr:
@@ -120,7 +116,6 @@ for outputBytes in [2,4,8,32,128,1024]:
                 print(len(output2))
 
             xorOutputs = xor(output1,output2)
-            xorOutputs_lis[f-1].append(xorOutputs)
 
             counter = frequencyCountingTestForRandomnessTesting(xorOutputs)
             D = standardDeviation(counter)
