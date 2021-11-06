@@ -8,8 +8,7 @@ import os
 import matplotlib.pyplot as plt
 
 debug = False
-#tot_itrations = int(sys.argv[1])
-
+tot_itrations = int(sys.argv[1])
 
 # Key scheduling function
 def keyScheduling(S,key,sBytes):
@@ -88,34 +87,71 @@ def standardDeviation(counter):
 def randomness(D,C,N):
 	return (D*C)/N
 
-    
-def vendorPart(vendorMessageLengthInBytes, maximumOutputToThrowForAnalysis, numberOfRuns):
-    avgRandomnessArr = [0 for i in range(maximumOutputToThrowForAnalysis)]
-    key = randomKeyStreamGeneration(256*8)
-    for i in range(numberOfRuns):
-        outputKeyStream = pseudoRandomGeneration(maximumOutputToThrowForAnalysis+vendorMessageLengthInBytes, 256, keyScheduling([], key, 256))
-        for i in range(maximumOutputToThrowForAnalysis):
-            output = outputKeyStream[i*8:i*8+vendorMessageLengthInBytes*8]
-            counter = frequencyCountingTestForRandomnessTesting(output)
-            D = standardDeviation(counter)
-            N = len(output)
-            C = len(counter)
-            avgRandomnessArr[i] += randomness(D,C,N)
-    for i in range(maximumOutputToThrowForAnalysis):
-        avgRandomnessArr[i] = avgRandomnessArr[i]/numberOfRuns
-    x= [i for i in range(maximumOutputToThrowForAnalysis)]
-    plt.figure()
-    plt.xlabel('Initial Output to throw')
-    plt.ylabel('R')
-    plt.plot(x,avgRandomnessArr)
-    
-    plt.savefig(sys.argv[2])
-    
-    plt.show()
-    numberOfOutputsWeShouldThrowForMinRandomness = avgRandomnessArr.index(min(avgRandomnessArr))
-    return numberOfOutputsWeShouldThrowForMinRandomness
 
-maximumOutputToThrowForAnalysis = 2560
-vendorMessageLengthInBytes = 50
-numberOfRuns = int(sys.argv[1])
-print(vendorPart(vendorMessageLengthInBytes, maximumOutputToThrowForAnalysis, numberOfRuns))
+outputBytes = int(sys.argv[1])
+
+
+key = randomKeyStreamGeneration(2048)
+if(debug):
+    print(len(key))
+
+output1 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], key, 256))
+if(debug):
+    print(len(output1))
+
+
+flippingBitsArr = [i for i in range(1,33)]
+
+rArr=[0 for i in range(32)]
+
+xorOutputs_lis = []
+
+for i in range(32):
+    xorOutputs_lis.append([])
+
+for i in range(tot_itrations):
+    for f in flippingBitsArr:
+        flippedKey = flippingKeyBits(key, f)
+        output2 = pseudoRandomGeneration(outputBytes, 256, keyScheduling([], flippedKey, 256))
+        
+        if(debug):
+            print(len(output2))
+        
+        xorOutputs = xor(output1,output2)
+        xorOutputs_lis[f-1].append(xorOutputs)
+        
+        counter = frequencyCountingTestForRandomnessTesting(xorOutputs)
+        D = standardDeviation(counter)
+        N = len(xorOutputs)
+        C = len(counter)
+        rArr[f-1] += (randomness(D,C,N))
+
+def avgLengthCalculator(output1, output2):
+	val = 0
+	for i in range(len(output1)):
+		if output1[i] == output2[i]:
+			val+=1
+		else:
+			break
+	return val/8
+
+def avgLengthOfIdenticalOutputVsNumberOfBitsFlipped(totalOutputBytes, numberOfRuns):
+    key = randomKeyStreamGeneration(256*8)
+    output1 = pseudoRandomGeneration(totalOutputBytes, 256, keyScheduling([], key, 256))
+    avgLengthArr = [0 for i in range(32)]
+    flippingBitsArr = [i for i in range(1,33)]
+    for i in range(numberOfRuns):
+        for f in flippingBitsArr:
+            flippedKey = flippingKeyBits(key, f)
+            output2 = pseudoRandomGeneration(totalOutputBytes, 256, keyScheduling([], flippedKey, 256))
+            avgLengthArr[f-1] += avgLengthCalculator(output1, output2)
+    for i in range(32):
+        avgLengthArr[i] = avgLengthArr[i]/numberOfRuns
+    plt.figure()
+    plt.plot(flippingBitsArr, avgLengthArr)
+    plt.xlabel('Number bits fliped')
+    plt.ylabel('Average length in bytes of identical output')
+    plt.savefig(sys.argv[2])
+    plt.show()
+
+avgLengthOfIdenticalOutputVsNumberOfBitsFlipped(1000, tot_itrations)
